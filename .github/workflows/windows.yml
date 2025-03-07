@@ -54,9 +54,11 @@ jobs:
 
     - name: Build
       run: |
+        Get-ChildItem -Recurse
         $env:VSPYTHON38_PATH="${{ env.PYTHON38_PATH }}"
         $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
         msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
+        Get-ChildItem -Recurse
 
     - name: Package for Python 3.13
       run: |
@@ -108,18 +110,3 @@ jobs:
       run: |
         pip install vapoursynth --no-index --find-links .
         python -c "from vapoursynth import core; print(core.std.BlankClip())"
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: test-windows
-    if: startsWith(github.event.ref, 'refs/tags/R') && !(contains(github.event.ref, 'RC'))
-    permissions:
-      id-token: write
-
-    steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: vapoursynth
-        path: dist
-
-    - uses: pypa/gh-action-pypi-publish@release/v1
